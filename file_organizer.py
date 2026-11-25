@@ -1,13 +1,11 @@
 
-import os
 import shutil
-
 from pathlib import Path
 
 print("AUTOMATIC FILE ORGANIZER")
 print("=" * 35)
 
-# Create a test folder
+# Folder containing files to organize
 folder = Path("unsorted_files")
 folder.mkdir(exist_ok=True)
 
@@ -22,6 +20,9 @@ categories = {
 
 print(f"\nOrganizing files in: {folder}")
 
+moved_count = 0
+failed_count = 0
+
 for file in folder.iterdir():
 
     if not file.is_file():
@@ -35,18 +36,30 @@ for file in folder.iterdir():
             break
 
     destination = folder / category
-    destination.mkdir(exist_ok=True)
 
-    new_location = destination / file.name
+    try:
+        destination.mkdir(exist_ok=True)
 
-    # Avoid overwriting existing files
-    counter = 1
-    while new_location.exists():
-        new_location = destination / f"{file.stem}_{counter}{file.suffix}"
-        counter += 1
+        new_location = destination / file.name
 
-    shutil.move(str(file), str(new_location))
+        # Avoid overwriting existing files
+        counter = 1
 
-    print(f"Moved {file.name} -> {category}")
+        while new_location.exists():
+            new_location = destination / f"{file.stem}_{counter}{file.suffix}"
+            counter += 1
 
-print("\nFile organization completed!")
+        shutil.move(str(file), str(new_location))
+
+        print(f"Moved: {file.name} -> {category}")
+        moved_count += 1
+
+    except OSError as error:
+        print(f"Could not move {file.name}: {error}")
+        failed_count += 1
+
+print("\n" + "=" * 35)
+print("ORGANIZATION SUMMARY")
+print(f"Files moved successfully: {moved_count}")
+print(f"Files failed: {failed_count}")
+print("Organization completed!")
