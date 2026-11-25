@@ -1,0 +1,52 @@
+
+import os
+import shutil
+
+from pathlib import Path
+
+print("AUTOMATIC FILE ORGANIZER")
+print("=" * 35)
+
+# Create a test folder
+folder = Path("unsorted_files")
+folder.mkdir(exist_ok=True)
+
+# File categories
+categories = {
+    "Images": [".jpg", ".jpeg", ".png", ".gif"],
+    "Documents": [".pdf", ".docx", ".txt", ".doc"],
+    "Videos": [".mp4", ".mkv", ".avi"],
+    "Audio": [".mp3", ".wav"],
+    "Archives": [".zip", ".rar"],
+}
+
+print(f"\nOrganizing files in: {folder}")
+
+for file in folder.iterdir():
+
+    if not file.is_file():
+        continue
+
+    category = "Others"
+
+    for name, extensions in categories.items():
+        if file.suffix.lower() in extensions:
+            category = name
+            break
+
+    destination = folder / category
+    destination.mkdir(exist_ok=True)
+
+    new_location = destination / file.name
+
+    # Avoid overwriting existing files
+    counter = 1
+    while new_location.exists():
+        new_location = destination / f"{file.stem}_{counter}{file.suffix}"
+        counter += 1
+
+    shutil.move(str(file), str(new_location))
+
+    print(f"Moved {file.name} -> {category}")
+
+print("\nFile organization completed!")
